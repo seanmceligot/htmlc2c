@@ -5,11 +5,18 @@
 #include <pcre.h>
 #include <libtemplate.h>
 
+#ifndef FALSE
+#define FALSE 0
+#define TRUE !FALSE
+#endif
 
-char *templatedir = "templates";
-//char *templatedir = "/usr/share/cerverpages";
-char *outdir = ".";
-FILE *out = stdout;
+#ifndef BOOL
+#define BOOL int
+#endif
+
+#define BUFSIZE 1024
+
+FILE* out;
 
 void usage (char *argv0)
 {
@@ -19,18 +26,16 @@ void usage (char *argv0)
 
 void get_basename (const char *filename, char* basename)
 {
+	char* dot;
+
 	strcpy(basename,filename);
-	char *dot = strrchr (basename, '.');
+	dot = strrchr (basename, '.');
 	if (dot == NULL) {
 		return;
 	}
 	*dot = 0;
 }
 
-char *code_pattern = "\\<code\\ class=\\\"cgi\\\"\\>";
-char *script_pattern =
-	"\\<script\\ type=\\\"text\\/c\\+\\+\\\"\\ class=\\\"cgi\\\"\\>";
-char *end_pattern = "</code|script>";
 pcre *code_re;
 pcre *script_re;
 pcre *end_re;
@@ -39,8 +44,10 @@ pcre *compile (char *pattern)
 {
 	const char *error;
 	int erroffset;
+	pcre* re;
+
 	fprintf (stderr, "%s\n", pattern);
-	pcre *re = pcre_compile (pattern, 0, &error, &erroffset, NULL);
+	re = pcre_compile (pattern, 0, &error, &erroffset, NULL);
 	if (!re) {
 		fprintf (stderr, "PCRE compilation failed at offset %d: %s\n", erroffset,
 						 error);
@@ -49,51 +56,56 @@ pcre *compile (char *pattern)
 	return re;
 }
 
-bool gencp_init ()
+BOOL gencp_init ()
 {
+	char *code_pattern = "\\<code\\ class=\\\"cgi\\\"\\>";
+	char *script_pattern =
+	"\\<script\\ type=\\\"text\\/c\\+\\+\\\"\\ class=\\\"cgi\\\"\\>";
+	char *end_pattern = "</code|script>";
 	code_re = compile (code_pattern);
 	script_re = compile (script_pattern);
 	end_re = compile (end_pattern);
 	return (code_re != NULL) && (script_re != NULL) && (end_re != NULL);
 }
-const int BUFSIZE = 1024;
-char inbuf[BUFSIZE];
 
 char *nextline (FILE * fin)
 {
+	static char inbuf[BUFSIZE];
 	char *lineptr = fgets (inbuf, BUFSIZE, fin);
 	return lineptr;
 }
 
-bool getmatch (char *lineptr, int *out_offset, int *out_len, pcre * re,
+BOOL getmatch (char *lineptr, int *out_offset, int *out_len, pcre * re,
 							 int linelen)
 {
 	const int RCOUNT = 3;
 	int result[RCOUNT];
 	int resultcount =
 		pcre_exec (re, NULL, lineptr, linelen, 0, 0, result, RCOUNT);
+	int end;
+
 	if ((resultcount < 0) && (resultcount != PCRE_ERROR_NOMATCH)) {
 		fprintf (stderr, "Matching error %d (%s)\n", resultcount, lineptr);
 	} else if (resultcount > 0) {
 		*out_offset = result[0];
-		const int end = result[1];
+		end = result[1];
 		*out_len = end - *out_offset;
-		return true;
+		return TRUE;
 	}
-	return false;
+	return FALSE;
 }
 
-bool getcodeend (char *lineptr, int *out_offset, int *out_len)
+BOOL getcodeend (char *lineptr, int *out_offset, int *out_len)
 {
 	int linelen = strlen (lineptr);
 	return getmatch (lineptr, out_offset, out_len, end_re, linelen);
 }
 
-bool getcodestart (char *lineptr, int *out_offset, int *out_len)
+BOOL getcodestart (char *lineptr, int *out_offset, int *out_len)
 {
 	int linelen = (int) strlen (lineptr);
 	if (getmatch (lineptr, out_offset, out_len, code_re, linelen)) {
-		return true;
+		return TRUE;
 	}
 	return getmatch (lineptr, out_offset, out_len, script_re, linelen);
 }
@@ -129,8 +141,9 @@ void printhtml (char *lineptr)
 }
 void printnhtml (char *lineptr, int len)
 {
+				int i;
 	fputs ("  puts(\"", out);
-	for (int i = 0; i < len; i++) {
+	for (i = 0; i < len; i++) {
 		htmlputc (*lineptr);
 		lineptr++;
 	}
@@ -142,20 +155,22 @@ void printcode (char *lineptr)
 }
 void printncode (char *lineptr, int len)
 {
-	for (int i = 0; i < len; i++) {
+				int i;
+	for (i = 0; i < len; i++) {
 		fputc (lineptr[i], out);
 	}
 }
 void parse (FILE * fin)
 {
 	char *tmpname = "docgi.tmp";
+	char *lineptr;
+	int out_offset;
+	int out_len;
+
 	out = fopen (tmpname, "w");
 	if (out == NULL) {
 		fprintf (stderr, "could not open (%s)\n", tmpname);
 	}
-	char *lineptr;
-	int out_offset;
-	int out_len;
 	while ((lineptr = nextline (fin)) != NULL) {
 		if (getcodestart (lineptr, &out_offset, &out_len)) {
 			printnhtml (lineptr, out_offset - 1);
@@ -176,22 +191,26 @@ void parse (FILE * fin)
 	}
 	fclose (out);
 }
-void writeTemplate (Template * libtemplate, const char *tin, const char *fname, const char *ext, const bool overwrite)
+void writeTemplate (Template * libtemplate, const char *tin, const char *fname, const char *ext, const BOOL overwrite)
 {
+//char *templatedir = "/usr/share/cerverpages";
 	char *template_dir = "templates";
 	char inname[256];
+	char outname[256];
+	FILE* in;
+	FILE* exists;
+
 	strcpy (inname, template_dir);
 	strcat (inname, "/");
 	strcat (inname, tin);
-	char outname[256];
 	strcpy (outname, fname);
 	strcat (outname, ext);
 
-	FILE *in = fopen (inname, "r");
+	in = fopen (inname, "r");
 	if (in == NULL) {
 		fprintf (stderr, "could not open (%s)\n", inname);
 	}
-	FILE *exists = fopen (outname, "r");
+	exists = fopen (outname, "r");
 	if (exists) {
 		fclose (exists);
 		if (!overwrite) {
@@ -200,7 +219,7 @@ void writeTemplate (Template * libtemplate, const char *tin, const char *fname, 
 		}
 	}
 	fprintf(stderr, "%s -> %s\n", inname, outname);
-	FILE *out = fopen (outname, "w");
+	out = fopen (outname, "w");
 	if (out == NULL) {
 		fprintf (stderr, "could not open (%s)\n", outname);
 	}
@@ -215,24 +234,38 @@ void uppercase(char* s) {
 								s++;
 				}
 }
-void html2cgi (const char *basename, const char *htmlfile)
+void gencp(const char *basename, const char *htmlfile)
 {
+	Template* libtemplate;
+	char* upname;
 	FILE *htmlin = fopen (htmlfile, "r");
+	
 	parse (htmlin);
 	fclose (htmlin);
 	template_init();
-	Template *libtemplate = template_new ();
+	libtemplate = template_new ();
 	template_addkeyvalue (libtemplate, "name", basename);
-	char *upname = strdup (basename);
+	upname = strdup (basename);
 	uppercase(upname);
 
 	template_addkeyvalue (libtemplate, "upname", upname);
-	writeTemplate (libtemplate, "impl.cc", basename, ".cc", false);
-	writeTemplate (libtemplate, "impl.h", basename, ".h", false);
-	writeTemplate (libtemplate, "impl_docgi.cc", basename, "_docgi.cc", true);
+	writeTemplate (libtemplate, "impl.c", basename, ".c", FALSE);
+	writeTemplate (libtemplate, "impl.h", basename, ".h", FALSE);
+	writeTemplate (libtemplate, "impl_docgi.c", basename, "_docgi.c", TRUE);
 	template_destroy(libtemplate);
 	template_shutdown();
 	free(upname);
+}
+void gencp_start(const char* htmlfile) {
+	char basename[FILENAME_MAX];
+
+	if (!gencp_init ()) {
+					exit(1);
+	}
+	printf ("%s\n", htmlfile);
+	get_basename (htmlfile, basename);
+	printf ("%s\n", basename);
+	gencp(basename, htmlfile);
 }
 int main (int argc, char **argv)
 {
@@ -243,12 +276,6 @@ int main (int argc, char **argv)
 	const char *htmlfile = argv[arg];
 	*/
 	const char* htmlfile = "test.html";
-	if (!gencp_init ()) {
-					exit(1);
-	}
-	printf ("%s\n", htmlfile);
-	char basename[FILENAME_MAX];
-	get_basename (htmlfile, basename);
-	printf ("%s\n", basename);
-	html2cgi (basename, htmlfile);
+	gencp_start(htmlfile);
+	return 0;
 }

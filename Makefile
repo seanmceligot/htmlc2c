@@ -21,17 +21,17 @@ SUBDIRS=examples/item
 LIBS=-L/usr/lib -lm -lpcre ${GLIB_LIBS} -ltemplate
 OBJS=
 WARN=-Wall
-CXXFLAGS=-g $(DEFINES) $(WARN) $(INCLUDES) $(GLIB_CFLAGS) 
+CFLAGS=-g $(DEFINES) $(WARN) $(INCLUDES) $(GLIB_CFLAGS) 
 #LDFLAGS=-shared -Wl,-rpath,/usr/lib
 
 all: gencp$(EXE)
 
 clean:
-	rm -f test.h test.cc test_docgi.cc test$(EX) *.tmp core *.stackdump *.o gencp$(EXE)
+	rm -f test.h test.c test_docgi.c test$(EX) *.tmp core *.stackdump *.o gencp$(EXE)
 
 gencp$(EXE): gencp.o  $(OBJS)
-	g++ -g $(LDFLAGS) $(WARN) -o $@ $< $(OBJS) $(LIBS)                                        
-gencp.o: gencp.cc
+	gcc -g $(LDFLAGS) $(WARN) -o $@ $< $(OBJS) $(LIBS)                                        
+gencp.o: gencp.c
 gencp$(EXE): gencp.o
 
 install: 
@@ -46,15 +46,15 @@ uninstall:
 examples:
 	make -C examples/item
 
-%.cc: %.html
+%.c: %.html
 	./gencp $<
 
 runtest:
-	rm -f test.h test.cc test_docgi.cc
+	rm -f test.h test.c test_docgi.c
 	./gencp test.html
 
 test$(EXE): test.o test_docgi.o 
-	g++ -g -o $@ $^ -L/usr/lib
+	gcc -g -o $@ test.o test_docgi.o -L/usr/lib
 
-test_docgi.o: test_docgi.cc
+test_docgi.o: test_docgi.c
 

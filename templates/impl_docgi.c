@@ -6,8 +6,7 @@
 // This file will be overwritten by cerverpages.py
 
 
-
-void ${name}::docgi ()
+void ${name}_docgi ()
 {
 	puts ("Content-type: text/html\n");
 	${i:docgi.tmp}
@@ -15,8 +14,7 @@ void ${name}::docgi ()
 
 int main (int argc, char *argv[])
 {
-				${name} ${name};
-				${name}.init();
-				${name}.docgi();
-				${name}.shutdown();
+				${name}_init();
+				${name}_docgi();
+				${name}_shutdown();
 }
