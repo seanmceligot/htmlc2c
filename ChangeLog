@@ -1,0 +1,28 @@
+2002-10-31  smceligot  <smceligot@blue>
+
+	* /cvsroot/htmlc2c/htmlc2c/gencp.c, /cvsroot/htmlc2c/htmlc2c/test.html:
+	changed script tag to <% c code %>
+
+	* /cvsroot/htmlc2c/htmlc2c/Makefile, /cvsroot/htmlc2c/htmlc2c/gencp.c, /cvsroot/htmlc2c/htmlc2c/main.c, /cvsroot/htmlc2c/htmlc2c/stringutil.c, /cvsroot/htmlc2c/htmlc2c/stringutil.h, /cvsroot/htmlc2c/htmlc2c/test.html:
+	code tags no longer need to be at begining and end of lines
+
+	* /cvsroot/htmlc2c/htmlc2c/Makefile, /cvsroot/htmlc2c/htmlc2c/gencp.c, /cvsroot/htmlc2c/htmlc2c/htmlc2c_util.h, /cvsroot/htmlc2c/htmlc2c/main.c, /cvsroot/htmlc2c/htmlc2c/stringutil.c, /cvsroot/htmlc2c/htmlc2c/stringutil.h, /cvsroot/htmlc2c/htmlc2c/templates/impl_docgi.c, /cvsroot/htmlc2c/htmlc2c/test.html:
+	converted to getopt
+	allow custom template directory
+	allow code start and end on same line
+	use libtemplate-0.3
+
+2002-10-09  smceligot  <smceligot@blue>
+
+	* /cvsroot/htmlc2c/htmlc2c/cerverpages.h: converted to c
+
+2002-10-08  smceligot  <smceligot@blue>
+
+	* /cvsroot/htmlc2c/htmlc2c/Makefile, /cvsroot/htmlc2c/htmlc2c/cerverpages.cc, /cvsroot/htmlc2c/htmlc2c/gencp.c, /cvsroot/htmlc2c/htmlc2c/gencp.cc, /cvsroot/htmlc2c/htmlc2c/templates/cgi.cc, /cvsroot/htmlc2c/htmlc2c/templates/impl.c, /cvsroot/htmlc2c/htmlc2c/templates/impl.cc, /cvsroot/htmlc2c/htmlc2c/templates/impl.h, /cvsroot/htmlc2c/htmlc2c/templates/impl_docgi.c, /cvsroot/htmlc2c/htmlc2c/templates/impl_docgi.cc:
+	convert to c from c++
+
+2002-10-02  smceligot  <smceligot@blue>
+
+	* /cvsroot/htmlc2c/htmlc2c/Makefile, /cvsroot/htmlc2c/htmlc2c/cerverpages.cc, /cvsroot/htmlc2c/htmlc2c/cerverpages.h, /cvsroot/htmlc2c/htmlc2c/gencp.cc, /cvsroot/htmlc2c/htmlc2c/templates/Makefile, /cvsroot/htmlc2c/htmlc2c/templates/cgi.cc, /cvsroot/htmlc2c/htmlc2c/templates/impl.cc, /cvsroot/htmlc2c/htmlc2c/templates/impl.h, /cvsroot/htmlc2c/htmlc2c/templates/impl_docgi.cc, /cvsroot/htmlc2c/htmlc2c/test.html:
+	Initial Import
+
