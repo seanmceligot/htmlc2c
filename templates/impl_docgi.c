@@ -17,4 +17,5 @@ int main (int argc, char *argv[])
 				${name}_init();
 				${name}_docgi();
 				${name}_shutdown();
+				return 0;
 }

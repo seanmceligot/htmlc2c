@@ -1,10 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
 <html>
 <head>
-<meta name="generator" content="HTML Tidy, see www.w3.org">
-<title></title>
-<meta name="generator" content="txt2html v1.28">
-<base href="file:///E:/cygwin/usr/src/html2cgi-0.1/test.html">
+<title>gencp test</title>
 <style type="text/css">
  code.cgi {color:grey;white-space:pre}
 </style>
@@ -12,9 +9,11 @@
 <body>
 This is plain html<br>
 <code class="cgi">
+	char* str = "Hello World!";
 	fputs("<h1>this is c</h1>\n", stdout);
 </code>
 This is html again<br>
+<code class="cgi"> puts(str); </code>
 </body>
 </html>
 

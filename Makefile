@@ -10,7 +10,7 @@ GLIB_CFLAGS=${shell pkg-config --cflags $(GLIB)}
 WARN=-Wall
 CFLAGS=-g $(WARN) 
 CC=gcc
-OBJS=main.o
+OBJS=gencp.o
 
 prefix=/usr
 SHAREDIR=$(DESTDIR)/share/cerverpages
@@ -19,7 +19,7 @@ LIBDIR=$(DESTDIR)/lib
 INCDIR=$(DESTDIR)/include
 SUBDIRS=examples/item
 LIBS=-L/usr/lib -lm -lpcre ${GLIB_LIBS} -ltemplate
-OBJS=
+OBJS=stringutil.o
 WARN=-Wall
 CFLAGS=-g $(DEFINES) $(WARN) $(INCLUDES) $(GLIB_CFLAGS) 
 #LDFLAGS=-shared -Wl,-rpath,/usr/lib
@@ -29,8 +29,8 @@ all: gencp$(EXE)
 clean:
 	rm -f test.h test.c test_docgi.c test$(EX) *.tmp core *.stackdump *.o gencp$(EXE)
 
-gencp$(EXE): gencp.o  $(OBJS)
-	gcc -g $(LDFLAGS) $(WARN) -o $@ $< $(OBJS) $(LIBS)                                        
+gencp$(EXE): $(OBJS) main.o
+	gcc -g $(LDFLAGS) $(WARN) -o $@ $^ $(LIBS)                                        
 gencp.o: gencp.c
 gencp$(EXE): gencp.o
 
@@ -47,14 +47,20 @@ examples:
 	make -C examples/item
 
 %.c: %.html
-	./gencp $<
+	./gencp -t templates $<
 
-runtest:
+
+test.o: test.c
+
+test: gencp${EXE}
+	./gencp --verbose -t templates test.html
+	${COMPILE.C} test.c
+	${COMPILE.C} test_docgi.c
+	gcc -g -o test test.o test_docgi.o -L/usr/lib
 	rm -f test.h test.c test_docgi.c
-	./gencp test.html
-
-test$(EXE): test.o test_docgi.o 
-	gcc -g -o $@ test.o test_docgi.o -L/usr/lib
+	./test
 
 test_docgi.o: test_docgi.c
 
+
+.PHONY: test
