@@ -16,9 +16,12 @@ static FILE *out;
 static char gencp_template_dir[FILENAME_MAX];
 static pcre *code_re;
 static pcre *script_re;
-static pcre *end_re;
+static pcre *code_end_re;
+static pcre *script_end_re;
 
 extern int template_verbose;
+
+typedef enum {TAG_NONE, TAG_CODE, TAG_SCRIPT} TagType ;
 
 void
 gencp_set_template_dir (char *dir)
@@ -81,8 +84,9 @@ gencp_init ()
 {
   char *code_pattern = "\\<code\\ class=\\\"cgi\\\"\\>";
   char *script_pattern =
-    "\\<script\\ type=\\\"text\\/c\\+\\+\\\"\\ class=\\\"cgi\\\"\\>";
-  char *end_pattern = "</code|script>";
+    "\\<%";
+  char *code_end_pattern = "</code>";
+  char *script_end_pattern = "%>";
   code_re = compile (code_pattern);
   if (!code_re)
     {
@@ -93,8 +97,13 @@ gencp_init ()
     {
       return FALSE;
     }
-  end_re = compile (end_pattern);
-  if (!end_re)
+  code_end_re = compile (code_end_pattern);
+  if (!code_end_re)
+    {
+      return FALSE;
+    }
+  script_end_re = compile (script_end_pattern);
+  if (!script_end_re)
     {
       return FALSE;
     }
@@ -138,21 +147,28 @@ getmatch (char *lineptr, int *out_offset, int *out_len, pcre * re,
 }
 
 static BOOL
-getcodeend (char *lineptr, int *out_offset, int *out_len)
+getcodeend (char *lineptr, int *out_offset, int *out_len, TagType tag_type)
 {
   int linelen = strlen (lineptr);
-  return getmatch (lineptr, out_offset, out_len, end_re, linelen);
+	if (tag_type == TAG_SCRIPT) {
+  	return getmatch (lineptr, out_offset, out_len, script_end_re, linelen);
+	} else if (tag_type == TAG_CODE) {
+  	return getmatch (lineptr, out_offset, out_len, code_end_re, linelen);
+	}
+	return FALSE;
 }
-
 static BOOL
 getcodestart (char *lineptr, int *out_offset, int *out_len)
 {
   int linelen = (int) strlen (lineptr);
   if (getmatch (lineptr, out_offset, out_len, code_re, linelen))
     {
-      return TRUE;
+      return TAG_CODE;
     }
-  return getmatch (lineptr, out_offset, out_len, script_re, linelen);
+  if (getmatch (lineptr, out_offset, out_len, script_re, linelen)) {
+					return TAG_SCRIPT;
+	}
+	return TAG_NONE;
 }
 
 static void
@@ -225,7 +241,7 @@ parse (FILE * fin)
   char *lineptr;
   int out_offset;
   int out_len;
-
+	TagType tag_type;
   out = fopen (tmpname, "w");
   if (out == NULL)
     {
@@ -233,11 +249,11 @@ parse (FILE * fin)
     }
   while ((lineptr = nextline (fin)) != NULL)
     {
-      if (getcodestart (lineptr, &out_offset, &out_len))
+      if ((tag_type = getcodestart (lineptr, &out_offset, &out_len)))
         {
           printnhtml (lineptr, out_offset);
           lineptr += out_offset + out_len;
-          while (!getcodeend (lineptr, &out_offset, &out_len))
+          while (!getcodeend (lineptr, &out_offset, &out_len, tag_type))
             {
               printcode (lineptr);
               lineptr = nextline (fin);
