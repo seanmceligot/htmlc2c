@@ -70,7 +70,7 @@ compile (char *pattern)
   if (!re)
     {
       fprintf (stderr, "PCRE compilation failed at offset %d: %s\n",
-	       erroffset, error);
+               erroffset, error);
       return NULL;
     }
   return re;
@@ -115,7 +115,7 @@ nextline (FILE * fin)
 
 static BOOL
 getmatch (char *lineptr, int *out_offset, int *out_len, pcre * re,
-	  int linelen)
+          int linelen)
 {
   const int RCOUNT = 3;
   int result[RCOUNT];
@@ -177,7 +177,7 @@ htmlputc (char ch)
 static void
 printhtml (char *lineptr)
 {
-  if (strcmp (lineptr, "\n") == 0)
+  if (*lineptr == '\n')
     {
       return;
     }
@@ -194,13 +194,13 @@ static void
 printnhtml (char *lineptr, int len)
 {
   int i;
-  fputs ("  puts(\"", out);
+  fputs ("  fputs(\"", out);
   for (i = 0; i < len; i++)
     {
       htmlputc (*lineptr);
       lineptr++;
     }
-  fputs ("\");\n", out);
+  fputs ("\", stdout);\n", out);
 }
 
 static void
@@ -234,33 +234,33 @@ parse (FILE * fin)
   while ((lineptr = nextline (fin)) != NULL)
     {
       if (getcodestart (lineptr, &out_offset, &out_len))
-	{
-	  printnhtml (lineptr, out_offset - 1);
-	  lineptr += out_offset + out_len;
-	  while (!getcodeend (lineptr, &out_offset, &out_len))
-	    {
-	      printcode (lineptr);
-	      lineptr = nextline (fin);
-	      if (lineptr == NULL)
-		{
-		  return;
-		}
-	    }
-	  printncode (lineptr, out_offset);
-	  fputc ('\n', out);
-	  lineptr += out_offset + out_len;
-	}
+        {
+          printnhtml (lineptr, out_offset);
+          lineptr += out_offset + out_len;
+          while (!getcodeend (lineptr, &out_offset, &out_len))
+            {
+              printcode (lineptr);
+              lineptr = nextline (fin);
+              if (lineptr == NULL)
+                {
+                  return;
+                }
+            }
+          printncode (lineptr, out_offset);
+          lineptr += out_offset + out_len +1;
+          printhtml (lineptr);
+        }
       else
-	{
-	  printhtml (lineptr);
-	}
+        {
+          printhtml (lineptr);
+        }
     }
   fclose (out);
 }
 
 static void
 writeTemplate (Template * libtemplate, const char *tin, const char *fname,
-	       const char *ext, BOOL overwrite)
+               const char *ext, BOOL overwrite)
 {
   char inname[FILENAME_MAX];
   char outname[FILENAME_MAX];
@@ -286,11 +286,11 @@ writeTemplate (Template * libtemplate, const char *tin, const char *fname,
     {
       exists = fopen (outname, "r");
       if (exists)
-	{
-	  fclose (exists);
-	  fprintf (stderr, "not overwriting %s\n", outname);
-	  return;
-	}
+        {
+          fclose (exists);
+          fprintf (stderr, "not overwriting %s\n", outname);
+          return;
+        }
     }
   fprintf (stderr, "%s -> %s\n", inname, outname);
   out = fopen (outname, "w");
@@ -307,9 +307,9 @@ uppercase (char *s)
   while (*s != 0)
     {
       if (islower (*s))
-	{
-	  *s = *s - ('a' - 'A');
-	}
+        {
+          *s = *s - ('a' - 'A');
+        }
       s++;
     }
 }

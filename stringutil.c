@@ -7,7 +7,7 @@
 	 */
 int
 replace_insert (char *start, unsigned int deletelen, char *changeto, int
-		maxgrow, char *tempbuf)
+                maxgrow, char *tempbuf)
 {
   int stringlen = strlen (start);
   unsigned int changelen = strlen (changeto);
@@ -17,29 +17,29 @@ replace_insert (char *start, unsigned int deletelen, char *changeto, int
     {
       strncpy (start, changeto, changelen);
       if (changelen > stringlen)
-	{
-	  start[changelen] = 0;
-	}
+        {
+          start[changelen] = 0;
+        }
     }
   else
     {
       growth += diff;
       if (growth > maxgrow)
-	{
-	  fprintf (stderr, "maxlen exceeded\n");
-	  return growth;
-	}
+        {
+          fprintf (stderr, "maxlen exceeded\n");
+          return growth;
+        }
       else
-	{
-	  char *endptr = start + deletelen;
-	  strcpy (tempbuf, endptr);
-	  strcpy (endptr + diff, tempbuf);
-	  strncpy (start, changeto, changelen);
-	  if (changelen > stringlen)
-	    {
-	      start[changelen] = 0;
-	    }
-	}
+        {
+          char *endptr = start + deletelen;
+          strcpy (tempbuf, endptr);
+          strcpy (endptr + diff, tempbuf);
+          strncpy (start, changeto, changelen);
+          if (changelen > stringlen)
+            {
+              start[changelen] = 0;
+            }
+        }
     }
   return growth;
 

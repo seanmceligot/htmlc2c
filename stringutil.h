@@ -4,7 +4,7 @@
 	 */
 int
 replace_insert (char *start, unsigned int deletelen, char *changeto, int
-		maxgrow, char *tempbuf);
+                maxgrow, char *tempbuf);
 /*
 	* tempbuf must hold maxlen chars (a little less actually)
 */

@@ -27,7 +27,7 @@ CFLAGS=-g $(DEFINES) $(WARN) $(INCLUDES) $(GLIB_CFLAGS)
 all: gencp$(EXE)
 
 clean:
-	rm -f test.h test.c test_docgi.c test$(EX) *.tmp core *.stackdump *.o gencp$(EXE)
+	rm -f test.h test.c test_docgi.c test$(EXE) *.tmp core *.stackdump *.o gencp$(EXE)
 
 gencp$(EXE): $(OBJS) main.o
 	gcc -g $(LDFLAGS) $(WARN) -o $@ $^ $(LIBS)                                        
@@ -57,7 +57,6 @@ test: gencp${EXE}
 	${COMPILE.C} test.c
 	${COMPILE.C} test_docgi.c
 	gcc -g -o test test.o test_docgi.o -L/usr/lib
-	rm -f test.h test.c test_docgi.c
 	./test
 
 test_docgi.o: test_docgi.c

@@ -24,57 +24,57 @@ parse_args (int argc, char **argv)
   for (;;)
     {
       static struct option long_options[] = {
-	{"verbose", no_argument, &gencp_verbose, 1},
-	{"brief", no_argument, &gencp_verbose, 0},
-	{"template-verbose", no_argument, &template_verbose, 1},
-	{"template-brief", no_argument, &template_verbose, 0},
-	{"fastcgi", no_argument, &gencp_fastcgi, 1},
-	{"no-fastcgi", no_argument, &gencp_fastcgi, 0},
-	{"basename", required_argument, NULL, 'n'},
-	{"template-dir", required_argument, NULL, 't'},
-	{"overwrite", no_argument, &gencp_overwrite, 'o'},
-	{"help", no_argument, NULL, '?'},
-	{NULL, 0, NULL, 0}
+        {"verbose", no_argument, &gencp_verbose, 1},
+        {"brief", no_argument, &gencp_verbose, 0},
+        {"template-verbose", no_argument, &template_verbose, 1},
+        {"template-brief", no_argument, &template_verbose, 0},
+        {"fastcgi", no_argument, &gencp_fastcgi, 1},
+        {"no-fastcgi", no_argument, &gencp_fastcgi, 0},
+        {"basename", required_argument, NULL, 'n'},
+        {"template-dir", required_argument, NULL, 't'},
+        {"overwrite", no_argument, &gencp_overwrite, 'o'},
+        {"help", no_argument, NULL, '?'},
+        {NULL, 0, NULL, 0}
       };
       /* getopt_long stores the option index here. */
       int option_index = 0;
       c = getopt_long (argc, argv, "vfn:t:?", long_options, &option_index);
       if (c == -1)
-	{
-	  break;
-	}
+        {
+          break;
+        }
       switch (c)
-	{
-	case 0:
-	  /* If this option set a flag, do nothing else now. */
-	  if (long_options[option_index].flag != 0)
-	    break;
-	  debug ("option %s", long_options[option_index].name);
-	  if (optarg)
-	    debug (" with arg %s", optarg);
-	  debug ("\n");
-	  break;
-	case 't':
-	  gencp_set_template_dir (optarg);
-	  break;
-	case 'n':
-	  safe_strncpy (basename, optarg, FILENAME_MAX);
-	  break;
-	case 'v':
-	  gencp_verbose = TRUE;
-	  break;
-	case 'f':
-	  gencp_fastcgi = TRUE;
-	case 'h':
-	  usage ();
-	  return FALSE;
-	case '?':
-	  usage ();
-	  return FALSE;
-	default:
-	  return FALSE;
-	}			// switch
-    }				//while
+        {
+        case 0:
+          /* If this option set a flag, do nothing else now. */
+          if (long_options[option_index].flag != 0)
+            break;
+          debug ("option %s", long_options[option_index].name);
+          if (optarg)
+            debug (" with arg %s", optarg);
+          debug ("\n");
+          break;
+        case 't':
+          gencp_set_template_dir (optarg);
+          break;
+        case 'n':
+          safe_strncpy (basename, optarg, FILENAME_MAX);
+          break;
+        case 'v':
+          gencp_verbose = TRUE;
+          break;
+        case 'f':
+          gencp_fastcgi = TRUE;
+        case 'h':
+          usage ();
+          return FALSE;
+        case '?':
+          usage ();
+          return FALSE;
+        default:
+          return FALSE;
+        }                       // switch
+    }                           //while
   if (optind < argc)
     {
       safe_strncpy (htmlfile, argv[optind++], FILENAME_MAX);
